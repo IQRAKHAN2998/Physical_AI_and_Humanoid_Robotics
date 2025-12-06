@@ -1,0 +1,27 @@
+{
+  "id": "weekly-breakdown",
+  "title": "Weekly Breakdown",
+  "description": "Weeks 1-2: Introduction to Physical AI",
+  "source": "@site/docs/weekly-breakdown.md",
+  "sourceDirName": ".",
+  "slug": "/weekly-breakdown",
+  "permalink": "/docs/weekly-breakdown",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "title": "Weekly Breakdown"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Learning Outcomes",
+    "permalink": "/docs/learning-outcomes"
+  },
+  "next": {
+    "title": "Assessments",
+    "permalink": "/docs/assessments"
+  }
+}

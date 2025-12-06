@@ -1,0 +1,27 @@
+{
+  "id": "assessments",
+  "title": "Assessments",
+  "description": "- ROS 2 package development project",
+  "source": "@site/docs/assessments.md",
+  "sourceDirName": ".",
+  "slug": "/assessments",
+  "permalink": "/docs/assessments",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "Assessments"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Weekly Breakdown",
+    "permalink": "/docs/weekly-breakdown"
+  },
+  "next": {
+    "title": "Hardware Requirements",
+    "permalink": "/docs/hardware-requirements"
+  }
+}

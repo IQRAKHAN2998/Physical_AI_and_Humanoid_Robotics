@@ -1,0 +1,27 @@
+{
+  "id": "module-3-ai-robot-brain/nav2",
+  "title": "Nav2",
+  "description": "Nav2",
+  "source": "@site/docs/module-3-ai-robot-brain/04-nav2.md",
+  "sourceDirName": "module-3-ai-robot-brain",
+  "slug": "/module-3-ai-robot-brain/nav2",
+  "permalink": "/docs/module-3-ai-robot-brain/nav2",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "Nav2"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Isaac ROS",
+    "permalink": "/docs/module-3-ai-robot-brain/isaac-ros"
+  },
+  "next": {
+    "title": "Overview",
+    "permalink": "/docs/module-4-vla/overview"
+  }
+}

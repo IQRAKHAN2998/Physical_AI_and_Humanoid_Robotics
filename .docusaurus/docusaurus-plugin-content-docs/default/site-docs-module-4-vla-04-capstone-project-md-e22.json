@@ -1,0 +1,27 @@
+{
+  "id": "module-4-vla/capstone-project",
+  "title": "Capstone Project",
+  "description": "Capstone Project: The Autonomous Humanoid",
+  "source": "@site/docs/module-4-vla/04-capstone-project.md",
+  "sourceDirName": "module-4-vla",
+  "slug": "/module-4-vla/capstone-project",
+  "permalink": "/docs/module-4-vla/capstone-project",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "Capstone Project"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Cognitive Planning",
+    "permalink": "/docs/module-4-vla/cognitive-planning"
+  },
+  "next": {
+    "title": "Why Physical AI Matters",
+    "permalink": "/docs/why-physical-ai-matters"
+  }
+}

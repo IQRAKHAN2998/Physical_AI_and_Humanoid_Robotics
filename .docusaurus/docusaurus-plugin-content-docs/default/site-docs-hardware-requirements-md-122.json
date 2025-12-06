@@ -1,0 +1,23 @@
+{
+  "id": "hardware-requirements",
+  "title": "Hardware Requirements",
+  "description": "This course is technically demanding. It sits at the intersection of three heavy computational loads: Physics Simulation (Isaac Sim/Gazebo), Visual Perception (SLAM/Computer Vision), and Generative AI (LLMs/VLA).",
+  "source": "@site/docs/hardware-requirements.md",
+  "sourceDirName": ".",
+  "slug": "/hardware-requirements",
+  "permalink": "/docs/hardware-requirements",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5,
+    "title": "Hardware Requirements"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Assessments",
+    "permalink": "/docs/assessments"
+  }
+}

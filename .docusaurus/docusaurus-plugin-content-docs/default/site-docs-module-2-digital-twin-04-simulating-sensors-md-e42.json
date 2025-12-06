@@ -1,0 +1,27 @@
+{
+  "id": "module-2-digital-twin/simulating-sensors",
+  "title": "Simulating Sensors",
+  "description": "Simulating Sensors",
+  "source": "@site/docs/module-2-digital-twin/04-simulating-sensors.md",
+  "sourceDirName": "module-2-digital-twin",
+  "slug": "/module-2-digital-twin/simulating-sensors",
+  "permalink": "/docs/module-2-digital-twin/simulating-sensors",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "Simulating Sensors"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Unity Interaction",
+    "permalink": "/docs/module-2-digital-twin/unity-interaction"
+  },
+  "next": {
+    "title": "Overview",
+    "permalink": "/docs/module-3-ai-robot-brain/overview"
+  }
+}

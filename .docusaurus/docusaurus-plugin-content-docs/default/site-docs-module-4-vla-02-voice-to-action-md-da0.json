@@ -1,0 +1,27 @@
+{
+  "id": "module-4-vla/voice-to-action",
+  "title": "Voice-to-Action",
+  "description": "Voice-to-Action",
+  "source": "@site/docs/module-4-vla/02-voice-to-action.md",
+  "sourceDirName": "module-4-vla",
+  "slug": "/module-4-vla/voice-to-action",
+  "permalink": "/docs/module-4-vla/voice-to-action",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2,
+    "title": "Voice-to-Action"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Overview",
+    "permalink": "/docs/module-4-vla/overview"
+  },
+  "next": {
+    "title": "Cognitive Planning",
+    "permalink": "/docs/module-4-vla/cognitive-planning"
+  }
+}

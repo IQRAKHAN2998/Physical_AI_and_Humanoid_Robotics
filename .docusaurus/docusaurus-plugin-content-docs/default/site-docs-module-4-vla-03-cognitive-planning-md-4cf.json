@@ -1,0 +1,27 @@
+{
+  "id": "module-4-vla/cognitive-planning",
+  "title": "Cognitive Planning",
+  "description": "Cognitive Planning",
+  "source": "@site/docs/module-4-vla/03-cognitive-planning.md",
+  "sourceDirName": "module-4-vla",
+  "slug": "/module-4-vla/cognitive-planning",
+  "permalink": "/docs/module-4-vla/cognitive-planning",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "title": "Cognitive Planning"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Voice-to-Action",
+    "permalink": "/docs/module-4-vla/voice-to-action"
+  },
+  "next": {
+    "title": "Capstone Project",
+    "permalink": "/docs/module-4-vla/capstone-project"
+  }
+}

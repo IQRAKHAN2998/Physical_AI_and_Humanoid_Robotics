@@ -1,0 +1,12 @@
+{
+  "type": "mdx",
+  "permalink": "/my_project",
+  "source": "@site/src/pages/my_project.md",
+  "title": "My Project",
+  "description": "Main page for Physical AI & Humanoid Robotics course",
+  "frontMatter": {
+    "title": "My Project",
+    "description": "Main page for Physical AI & Humanoid Robotics course"
+  },
+  "unlisted": false
+}

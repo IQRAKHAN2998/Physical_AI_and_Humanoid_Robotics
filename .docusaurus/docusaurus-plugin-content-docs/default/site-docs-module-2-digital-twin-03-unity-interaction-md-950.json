@@ -1,0 +1,27 @@
+{
+  "id": "module-2-digital-twin/unity-interaction",
+  "title": "Unity Interaction",
+  "description": "Unity Interaction",
+  "source": "@site/docs/module-2-digital-twin/03-unity-interaction.md",
+  "sourceDirName": "module-2-digital-twin",
+  "slug": "/module-2-digital-twin/unity-interaction",
+  "permalink": "/docs/module-2-digital-twin/unity-interaction",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "title": "Unity Interaction"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Physics Simulation",
+    "permalink": "/docs/module-2-digital-twin/physics-simulation"
+  },
+  "next": {
+    "title": "Simulating Sensors",
+    "permalink": "/docs/module-2-digital-twin/simulating-sensors"
+  }
+}

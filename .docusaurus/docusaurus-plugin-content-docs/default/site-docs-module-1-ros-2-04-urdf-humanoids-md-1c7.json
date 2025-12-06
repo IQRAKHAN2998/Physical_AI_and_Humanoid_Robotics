@@ -1,0 +1,27 @@
+{
+  "id": "module-1-ros2/urdf-humanoids",
+  "title": "URDF Humanoids",
+  "description": "URDF Humanoids",
+  "source": "@site/docs/module-1-ros2/04-urdf-humanoids.md",
+  "sourceDirName": "module-1-ros2",
+  "slug": "/module-1-ros2/urdf-humanoids",
+  "permalink": "/docs/module-1-ros2/urdf-humanoids",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "URDF Humanoids"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "rclpy Bridge",
+    "permalink": "/docs/module-1-ros2/rclpy-bridge"
+  },
+  "next": {
+    "title": "Overview",
+    "permalink": "/docs/module-2-digital-twin/overview"
+  }
+}

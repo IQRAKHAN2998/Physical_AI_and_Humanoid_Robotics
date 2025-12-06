@@ -1,0 +1,27 @@
+{
+  "id": "module-1-ros2/rclpy-bridge",
+  "title": "rclpy Bridge",
+  "description": "rclpy Bridge",
+  "source": "@site/docs/module-1-ros2/03-rclpy-bridge.md",
+  "sourceDirName": "module-1-ros2",
+  "slug": "/module-1-ros2/rclpy-bridge",
+  "permalink": "/docs/module-1-ros2/rclpy-bridge",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "title": "rclpy Bridge"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Nodes, Topics, and Services",
+    "permalink": "/docs/module-1-ros2/nodes-topics-services"
+  },
+  "next": {
+    "title": "URDF Humanoids",
+    "permalink": "/docs/module-1-ros2/urdf-humanoids"
+  }
+}

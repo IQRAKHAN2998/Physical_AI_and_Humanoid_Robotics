@@ -1,0 +1,138 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/docs",
+          "mainDocId": "intro",
+          "docs": [
+            {
+              "id": "assessments",
+              "path": "/docs/assessments",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "hardware-requirements",
+              "path": "/docs/hardware-requirements",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "intro",
+              "path": "/docs/intro",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "learning-outcomes",
+              "path": "/docs/learning-outcomes",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2/nodes-topics-services",
+              "path": "/docs/module-1-ros2/nodes-topics-services",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2/overview",
+              "path": "/docs/module-1-ros2/overview",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2/rclpy-bridge",
+              "path": "/docs/module-1-ros2/rclpy-bridge",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-1-ros2/urdf-humanoids",
+              "path": "/docs/module-1-ros2/urdf-humanoids",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-digital-twin/overview",
+              "path": "/docs/module-2-digital-twin/overview",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-digital-twin/physics-simulation",
+              "path": "/docs/module-2-digital-twin/physics-simulation",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-digital-twin/simulating-sensors",
+              "path": "/docs/module-2-digital-twin/simulating-sensors",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-2-digital-twin/unity-interaction",
+              "path": "/docs/module-2-digital-twin/unity-interaction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-ai-robot-brain/isaac-ros",
+              "path": "/docs/module-3-ai-robot-brain/isaac-ros",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-ai-robot-brain/isaac-sim",
+              "path": "/docs/module-3-ai-robot-brain/isaac-sim",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-ai-robot-brain/nav2",
+              "path": "/docs/module-3-ai-robot-brain/nav2",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-3-ai-robot-brain/overview",
+              "path": "/docs/module-3-ai-robot-brain/overview",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-4-vla/capstone-project",
+              "path": "/docs/module-4-vla/capstone-project",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-4-vla/cognitive-planning",
+              "path": "/docs/module-4-vla/cognitive-planning",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-4-vla/overview",
+              "path": "/docs/module-4-vla/overview",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "module-4-vla/voice-to-action",
+              "path": "/docs/module-4-vla/voice-to-action",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "weekly-breakdown",
+              "path": "/docs/weekly-breakdown",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "why-physical-ai-matters",
+              "path": "/docs/why-physical-ai-matters",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/docs/intro",
+                "label": "intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

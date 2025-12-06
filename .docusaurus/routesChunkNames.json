@@ -1,0 +1,153 @@
+{
+  "/__docusaurus/debug-5ff": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/config-5ba": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/content-a2b": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    },
+    "__props": "__props---docusaurus-debug-content-3-c-0-be2"
+  },
+  "/__docusaurus/debug/globalData-c3c": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/metadata-156": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/registry-88c": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/routes-000": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/my_project-bdf": {
+    "__comp": "__comp---theme-mdx-page-1-f-3-b90",
+    "__context": {
+      "plugin": "plugin---my-projecta-74-d85"
+    },
+    "content": "content---my-project-60-c-7c6"
+  },
+  "/docs-f38": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---docsaba-d7c"
+    }
+  },
+  "/docs-36f": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---docs-005-788"
+  },
+  "/docs-b36": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/docs/assessments-9ce": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-assessmentsd-16-f3a"
+  },
+  "/docs/hardware-requirements-663": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-hardware-requirements-122-a39"
+  },
+  "/docs/intro-61d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-intro-0-e-3-be1"
+  },
+  "/docs/learning-outcomes-769": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-learning-outcomes-8-b-2-451"
+  },
+  "/docs/module-1-ros2/nodes-topics-services-80b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-1-ros-2-nodes-topics-services-0-f-9-f8c"
+  },
+  "/docs/module-1-ros2/overview-27d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-1-ros-2-overviewc-45-17c"
+  },
+  "/docs/module-1-ros2/rclpy-bridge-af5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-1-ros-2-rclpy-bridgeff-4-ad5"
+  },
+  "/docs/module-1-ros2/urdf-humanoids-54c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-1-ros-2-urdf-humanoids-1-c-7-4bc"
+  },
+  "/docs/module-2-digital-twin/overview-692": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-2-digital-twin-overview-5-da-aab"
+  },
+  "/docs/module-2-digital-twin/physics-simulation-6b0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-2-digital-twin-physics-simulation-199-412"
+  },
+  "/docs/module-2-digital-twin/simulating-sensors-84e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-2-digital-twin-simulating-sensorse-42-e2e"
+  },
+  "/docs/module-2-digital-twin/unity-interaction-8f7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-2-digital-twin-unity-interaction-950-bbb"
+  },
+  "/docs/module-3-ai-robot-brain/isaac-ros-8b2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-3-ai-robot-brain-isaac-ros-2-a-1-bc6"
+  },
+  "/docs/module-3-ai-robot-brain/isaac-sim-e1f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-3-ai-robot-brain-isaac-sima-66-210"
+  },
+  "/docs/module-3-ai-robot-brain/nav2-68f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-3-ai-robot-brain-nav-24-ec-b38"
+  },
+  "/docs/module-3-ai-robot-brain/overview-043": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-3-ai-robot-brain-overview-303-315"
+  },
+  "/docs/module-4-vla/capstone-project-8ce": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-4-vla-capstone-projecte-22-09a"
+  },
+  "/docs/module-4-vla/cognitive-planning-e6c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-4-vla-cognitive-planning-4-cf-060"
+  },
+  "/docs/module-4-vla/overview-0be": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-4-vla-overview-420-4f2"
+  },
+  "/docs/module-4-vla/voice-to-action-eea": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-module-4-vla-voice-to-actionda-0-d46"
+  },
+  "/docs/weekly-breakdown-776": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-weekly-breakdown-2-ab-35c"
+  },
+  "/docs/why-physical-ai-matters-2f4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-why-physical-ai-matters-744-9a8"
+  }
+}
