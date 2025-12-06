@@ -1,4 +1,5 @@
 export default {
+  "__comp---site-src-pages-index-jsc-4-f-f99": [() => import(/* webpackChunkName: "__comp---site-src-pages-index-jsc-4-f-f99" */ "@site/src/pages/index.js"), "@site/src/pages/index.js", require.resolveWeak("@site/src/pages/index.js")],
   "__comp---theme-debug-config-23-a-2ff": [() => import(/* webpackChunkName: "__comp---theme-debug-config-23-a-2ff" */ "@theme/DebugConfig"), "@theme/DebugConfig", require.resolveWeak("@theme/DebugConfig")],
   "__comp---theme-debug-contentba-8-ce7": [() => import(/* webpackChunkName: "__comp---theme-debug-contentba-8-ce7" */ "@theme/DebugContent"), "@theme/DebugContent", require.resolveWeak("@theme/DebugContent")],
   "__comp---theme-debug-global-dataede-0fa": [() => import(/* webpackChunkName: "__comp---theme-debug-global-dataede-0fa" */ "@theme/DebugGlobalData"), "@theme/DebugGlobalData", require.resolveWeak("@theme/DebugGlobalData")],
@@ -12,6 +13,7 @@ export default {
   "__comp---theme-mdx-page-1-f-3-b90": [() => import(/* webpackChunkName: "__comp---theme-mdx-page-1-f-3-b90" */ "@theme/MDXPage"), "@theme/MDXPage", require.resolveWeak("@theme/MDXPage")],
   "__props---docs-005-788": [() => import(/* webpackChunkName: "__props---docs-005-788" */ "@generated/docusaurus-plugin-content-docs/default/p/docs-175.json"), "@generated/docusaurus-plugin-content-docs/default/p/docs-175.json", require.resolveWeak("@generated/docusaurus-plugin-content-docs/default/p/docs-175.json")],
   "__props---docusaurus-debug-content-3-c-0-be2": [() => import(/* webpackChunkName: "__props---docusaurus-debug-content-3-c-0-be2" */ "@generated/docusaurus-plugin-debug/default/p/docusaurus-debug-content-0d5.json"), "@generated/docusaurus-plugin-debug/default/p/docusaurus-debug-content-0d5.json", require.resolveWeak("@generated/docusaurus-plugin-debug/default/p/docusaurus-debug-content-0d5.json")],
+  "config---5-e-9-4f3": [() => import(/* webpackChunkName: "config---5-e-9-4f3" */ "@generated/docusaurus.config"), "@generated/docusaurus.config", require.resolveWeak("@generated/docusaurus.config")],
   "content---docs-assessmentsd-16-f3a": [() => import(/* webpackChunkName: "content---docs-assessmentsd-16-f3a" */ "@site/docs/assessments.md"), "@site/docs/assessments.md", require.resolveWeak("@site/docs/assessments.md")],
   "content---docs-hardware-requirements-122-a39": [() => import(/* webpackChunkName: "content---docs-hardware-requirements-122-a39" */ "@site/docs/hardware-requirements.md"), "@site/docs/hardware-requirements.md", require.resolveWeak("@site/docs/hardware-requirements.md")],
   "content---docs-intro-0-e-3-be1": [() => import(/* webpackChunkName: "content---docs-intro-0-e-3-be1" */ "@site/docs/intro.md"), "@site/docs/intro.md", require.resolveWeak("@site/docs/intro.md")],

@@ -149,5 +149,12 @@
   "/docs/why-physical-ai-matters-2f4": {
     "__comp": "__comp---theme-doc-item-178-a40",
     "content": "content---docs-why-physical-ai-matters-744-9a8"
+  },
+  "/-2e1": {
+    "__comp": "__comp---site-src-pages-index-jsc-4-f-f99",
+    "__context": {
+      "plugin": "plugin---my-projecta-74-d85"
+    },
+    "config": "config---5-e-9-4f3"
   }
 }
