@@ -18,6 +18,10 @@
   "dependencies": {
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
+    "@google/generative-ai": "^0.24.1",
+    "@qdrant/js-client-rest": "^1.16.2",
+    "dotenv": "^17.2.3",
+    "pdf-parse": "^2.4.5",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   }

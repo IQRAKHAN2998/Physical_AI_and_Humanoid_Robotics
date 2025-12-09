@@ -1,0 +1,24 @@
+{
+  "name": "rag-backend",
+  "version": "1.0.0",
+  "description": "Node.js backend for RAG system",
+  "main": "api.js",
+  "scripts": {
+    "start": "node api.js",
+    "embed": "node embed.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.11.3",
+    "@qdrant/js-client-rest": "^1.9.0",
+    "anthropic": "^0.23.1",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
