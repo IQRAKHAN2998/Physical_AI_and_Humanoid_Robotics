@@ -1,3 +1,5 @@
+
+
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const { processDocs } = require('./embed');
 const { storeEmbeddings } = require('./store');

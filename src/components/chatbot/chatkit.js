@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import styles from './chatkit.module.css'; // We'll create this CSS module next
+import styles from './chatkit.module.css';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,22 +21,35 @@ const Chatbot = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:3000/query', {
+            // Call the RAG API with the query only
+            const response = await fetch('http://127.0.0.1:8000/query', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query: input }),
+                body: JSON.stringify({
+                    query: input
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
+
             const data = await response.json();
-            const botMessage = { sender: 'bot', text: data.answer };
+            const botMessage = {
+                sender: 'bot',
+                text: data.answer || data.response || 'Sorry, I could not process your request.'
+            };
             setMessages((prevMessages) => [...prevMessages, botMessage]);
         } catch (error) {
             console.error('Error sending message:', error);
-            const errorMessage = { sender: 'bot', text: 'Sorry, something went wrong.' };
+            const errorMessage = {
+                sender: 'bot',
+                text: `Sorry, an error occurred: ${error.message || 'Something went wrong.'}`
+            };
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
-        }
- finally {
+        } finally {
             setIsLoading(false);
         }
     };
@@ -56,7 +69,7 @@ const Chatbot = () => {
             {isOpen && (
                 <div className={styles.chatWindow}>
                     <div className={styles.chatHeader}>
-                        <h3>RAG Chatbot</h3>
+                        <h3>Chatbot</h3>
                         <button onClick={toggleChat}>X</button>
                     </div>
                     <div className={styles.chatMessages}>
@@ -65,7 +78,15 @@ const Chatbot = () => {
                                 {msg.text}
                             </div>
                         ))}
-                        {isLoading && <div className={`${styles.message} ${styles.bot}`}>Typing...</div>}
+                        {isLoading && (
+                            <div className={`${styles.message} ${styles.bot}`}>
+                                <div className={styles.typingIndicator}>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className={styles.chatInput}>
                         <input
