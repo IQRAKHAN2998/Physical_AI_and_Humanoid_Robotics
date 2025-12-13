@@ -3,5 +3,6 @@
     "context7",
     "github"
   ],
-  "disabledMcpjsonServers": []
+  "disabledMcpjsonServers": [],
+  "enableAllProjectMcpServers": true
 }

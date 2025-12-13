@@ -10,6 +10,7 @@ from qdrant_client.http import models
 from google.generativeai import GenerativeModel, configure
 import google.generativeai as genai
 import dotenv
+from database import db_manager
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -43,7 +44,12 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY or GEMINI_KEY environment variable is required")
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+# Try to initialize with gemini-pro, fallback if needed
+try:
+    model = genai.GenerativeModel('gemini-pro')
+except Exception:
+    # Fallback to a different model if gemini-pro is not available
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Initialize Qdrant client
 if QDRANT_API_KEY:
@@ -64,6 +70,7 @@ class QueryRequest(BaseModel):
     query: str
     top_k: Optional[int] = 5
     max_context_length: Optional[int] = 2000
+    selected_text: Optional[str] = None  # User-selected/highlighted text
 
 
 class RelevantDoc(BaseModel):
@@ -97,63 +104,138 @@ async def query_endpoint(request: QueryRequest):
     try:
         logger.info(f"Processing query: {request.query}")
 
-        # Generate embedding for the query
-        query_embedding = generate_query_embedding(request.query)
+        # Create a new session for this query
+        session_id = await db_manager.create_session()
+        if session_id is None:
+            logger.warning("Could not create session - database not initialized")
 
-        # Search in Qdrant for relevant chunks
-        search_results = qdrant_client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=query_embedding,
-            limit=request.top_k,
-            with_payload=True
-        )
+        # Check if selected text is provided (Selected Text Mode)
+        if request.selected_text and request.selected_text.strip():
+            logger.info("SELECTED TEXT MODE: Activated - bypassing Qdrant completely, using only user-provided text")
 
-        # Extract relevant documents
-        relevant_docs = []
-        context_parts = []
+            # In selected text mode, we don't query Qdrant at all (STRICT REQUIREMENT)
+            # We only use the selected text as context
+            context = request.selected_text.strip()
+            answer = generate_answer(request.query, context)
 
-        # Handle different result formats depending on Qdrant client version
-        for result in search_results:
-            # Check if result has payload attribute (newer versions)
-            if hasattr(result, 'payload') and result.payload:
-                doc = RelevantDoc(
-                    text=result.payload.get("text", ""),
-                    source=result.payload.get("source", ""),
-                    score=getattr(result, 'score', 0.0)  # Use getattr to handle different result formats
+            # Create a RelevantDoc from the selected text
+            relevant_docs = [RelevantDoc(
+                text=request.selected_text,
+                source="user_selected_text",
+                score=1.0  # Perfect score for user-provided text
+            )]
+
+            # Log the selected text in the database
+            if session_id:
+                await db_manager.save_selected_text(session_id, request.selected_text)
+                # Save the message with is_selection_based=True and source_type='selected_text'
+                await db_manager.save_message(
+                    session_id,
+                    request.query,
+                    answer,
+                    is_selection_based=True,
+                    source_type='selected_text'
                 )
-            # For older versions or different result formats
-            elif isinstance(result, dict) and 'payload' in result:
-                doc = RelevantDoc(
-                    text=result['payload'].get("text", ""),
-                    source=result['payload'].get("source", ""),
-                    score=result.get('score', 0.0)
-                )
-            else:
-                continue  # Skip if we can't extract the payload properly
 
-            relevant_docs.append(doc)
+            logger.info("ANSWER GENERATED: Source = user-selected text")
 
-            # Add to context for LLM, limiting the total context length
-            if len(" ".join(context_parts)) + len(doc.text) <= request.max_context_length:
-                context_parts.append(doc.text)
-
-        if not relevant_docs:
-            logger.warning("No relevant documents found for the query")
             return QueryResponse(
-                answer="I couldn't find any relevant information in the documentation to answer your query.",
-                relevant_docs=[]
+                answer=answer,
+                relevant_docs=relevant_docs
+            )
+        else:
+            logger.info("QDRANT MODE: Activated - performing vector search in Qdrant for relevant documents")
+
+            # Generate embedding for the query
+            query_embedding = generate_query_embedding(request.query)
+
+            # Search in Qdrant for relevant chunks
+            search_results = qdrant_client.query_points(
+                collection_name=COLLECTION_NAME,
+                query=query_embedding,
+                limit=request.top_k,
+                with_payload=True
             )
 
-        # Generate answer using the LLM with context
-        context = "\n\n".join(context_parts)
-        answer = generate_answer(request.query, context)
+            # Extract relevant documents
+            relevant_docs = []
+            context_parts = []
 
-        logger.info(f"Generated answer successfully. Found {len(relevant_docs)} relevant documents")
+            # Handle different result formats depending on Qdrant client version
+            for result in search_results:
+                # Check if result has payload attribute (newer versions)
+                if hasattr(result, 'payload') and result.payload:
+                    doc = RelevantDoc(
+                        text=result.payload.get("text", ""),
+                        source=result.payload.get("source", ""),
+                        score=getattr(result, 'score', 0.0)  # Use getattr to handle different result formats
+                    )
+                # For older versions or different result formats
+                elif isinstance(result, dict) and 'payload' in result:
+                    doc = RelevantDoc(
+                        text=result['payload'].get("text", ""),
+                        source=result['payload'].get("source", ""),
+                        score=result.get('score', 0.0)
+                    )
+                else:
+                    continue  # Skip if we can't extract the payload properly
 
-        return QueryResponse(
-            answer=answer,
-            relevant_docs=relevant_docs
-        )
+                relevant_docs.append(doc)
+
+                # Add to context for LLM, limiting the total context length
+                if len(" ".join(context_parts)) + len(doc.text) <= request.max_context_length:
+                    context_parts.append(doc.text)
+
+            if not relevant_docs:
+                logger.warning("No relevant documents found for the query")
+                answer = "I couldn't find any relevant information in the documentation to answer your query."
+                relevant_docs = []
+
+                # Save the message with source_type='qdrant' even when no docs found
+                if session_id:
+                    await db_manager.save_message(
+                        session_id,
+                        request.query,
+                        answer,
+                        is_selection_based=False,
+                        source_type='qdrant'
+                    )
+
+                return QueryResponse(
+                    answer=answer,
+                    relevant_docs=relevant_docs
+                )
+
+            # Generate answer using the LLM with context
+            context = "\n\n".join(context_parts)
+            answer = generate_answer(request.query, context)
+
+            logger.info(f"ANSWER GENERATED: Source = Qdrant retrieved documents. Found {len(relevant_docs)} relevant documents")
+
+            # Save retrieval logs for each relevant document
+            if session_id:
+                message_id = await db_manager.save_message(
+                    session_id,
+                    request.query,
+                    answer,
+                    is_selection_based=False,
+                    source_type='qdrant'
+                )
+
+                for doc in relevant_docs:
+                    await db_manager.save_retrieval_log(
+                        session_id,
+                        message_id,
+                        None,  # chunk_id could be added if available in payload
+                        doc.score,
+                        doc.source,
+                        doc.text
+                    )
+
+            return QueryResponse(
+                answer=answer,
+                relevant_docs=relevant_docs
+            )
 
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}")
@@ -192,7 +274,7 @@ def generate_answer(query: str, context: str) -> str:
 
     Args:
         query: The user's query
-        context: Retrieved context from the documentation
+        context: Retrieved context from the documentation or user-selected text
 
     Returns:
         Generated answer string
@@ -213,14 +295,21 @@ def generate_answer(query: str, context: str) -> str:
         """
 
         # Generate response using the Gemini model
-        response = model.generate_content(prompt)
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.7,
+                "max_output_tokens": 1024,
+            }
+        )
 
         # Return the generated text
         return response.text if response.text else "I couldn't generate an answer based on the provided context."
 
     except Exception as e:
         logger.error(f"Error generating answer: {str(e)}")
-        raise
+        # Fallback response if API call fails
+        return f"Due to an API error, I couldn't generate a full response. Error: {str(e)[:100]}..."
 
 
 @app.get("/test-connection")
@@ -303,6 +392,18 @@ async def health_check():
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
         raise HTTPException(status_code=503, detail="Service not ready")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database connection when the app starts."""
+    await db_manager.init_db()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close database connection when the app shuts down."""
+    await db_manager.close()
 
 
 if __name__ == "__main__":
