@@ -255,3 +255,50 @@ Best for: Learning ROS 2, Basic Computer Vision, and Sim-to-Real control.
 - Simulating in the cloud works well, but controlling a real robot from a cloud instance is dangerous due to latency.
 
 Solution: Students train in the Cloud, download the model (weights), and flash it to the local Jetson kit.
+
+## Running the Application
+
+To run the application:
+
+1. Start the backend API server:
+```bash
+cd rag-backend
+pip install -r requirements.txt
+python api.py
+```
+
+2. In a separate terminal, start the frontend:
+```bash
+npm install
+npm start
+```
+
+The application will be available at `http://localhost:3000`.
+
+## Chatbot Setup
+
+The chatbot functionality requires both the frontend and backend to be running simultaneously:
+
+1. Ensure your environment variables are set in `.env`:
+   - `GEMINI_API_KEY`: Your Google Gemini API key
+   - `QDRANT_URL`: Your Qdrant vector database URL
+   - `QDRANT_API_KEY`: Your Qdrant API key
+   - `REACT_APP_RAG_API_URL`: Should be set to `http://127.0.0.1:8000/query`
+
+2. Start the backend API server (this provides the RAG functionality):
+```bash
+cd rag-backend
+python api.py
+```
+
+3. In a separate terminal, start the frontend:
+```bash
+npm start
+```
+
+4. Once both are running, you can use the chatbot by clicking the 💬 icon on the website.
+
+If you see "Failed to fetch" errors, ensure that:
+- The backend API server is running on `http://127.0.0.1:8000`
+- Your Qdrant database is accessible and properly configured
+- Your GEMINI_API_KEY is valid and has sufficient quota

@@ -4,73 +4,76 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os
 import logging
+import dotenv
 import numpy as np
 from qdrant_client import QdrantClient
-from qdrant_client.http import models
-from google.generativeai import GenerativeModel, configure
 import google.generativeai as genai
-import dotenv
 from database import db_manager
+from embed import convert_to_text, split_into_chunks, generate_embedding, get_all_files, embed_documents
+from store import store_embeddings, search_embeddings
+import asyncio
 
-# Load environment variables
+# =========================
+# ENV & LOGGING
+# =========================
 dotenv.load_dotenv()
-
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
+# =========================
+# FASTAPI APP
+# =========================
 app = FastAPI(
     title="RAG Query API",
-    description="API for retrieving and generating answers from documentation using vector search",
-    version="1.0.0"
+    description="Retrieve + Generate answers from documentation",
+    version="1.0.0",
 )
 
-# Add CORS middleware to allow requests from the frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configuration
+# =========================
+# CONFIG
+# =========================
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_KEY")
 
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY or GEMINI_KEY environment variable is required")
+    raise ValueError("GEMINI_API_KEY or GEMINI_KEY is required")
 
+COLLECTION_NAME = "docusaurus-rag"  # MUST MATCH QDRANT
+
+# =========================
+# GEMINI SETUP
+# =========================
 genai.configure(api_key=GEMINI_API_KEY)
-# Try to initialize with gemini-pro, fallback if needed
 try:
-    model = genai.GenerativeModel('gemini-pro')
+    llm_model = genai.GenerativeModel("gemini-pro")
 except Exception:
-    # Fallback to a different model if gemini-pro is not available
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    llm_model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Initialize Qdrant client
+# =========================
+# QDRANT CLIENT
+# =========================
 if QDRANT_API_KEY:
-    qdrant_client = QdrantClient(
-        url=QDRANT_URL,
-        api_key=QDRANT_API_KEY,
-    )
+    qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 else:
-    qdrant_client = QdrantClient(
-        host='localhost',
-        port=6333
-    )
+    qdrant_client = QdrantClient(host="localhost", port=6333)
 
-COLLECTION_NAME = "docusaurus-rag"
-
-# Pydantic models
+# =========================
+# MODELS
+# =========================
 class QueryRequest(BaseModel):
     query: str
     top_k: Optional[int] = 5
     max_context_length: Optional[int] = 2000
-    selected_text: Optional[str] = None  # User-selected/highlighted text
+    selected_text: Optional[str] = None
 
 
 class RelevantDoc(BaseModel):
@@ -83,326 +86,246 @@ class QueryResponse(BaseModel):
     answer: str
     relevant_docs: List[RelevantDoc]
 
-
+# =========================
+# ROOT
+# =========================
 @app.get("/")
 async def root():
-    """Health check endpoint"""
-    return {"status": "ok", "message": "RAG Query API is running"}
+    return {"status": "ok", "message": "RAG API running"}
 
-
+# =========================
+# MAIN QUERY ENDPOINT
+# =========================
 @app.post("/query", response_model=QueryResponse)
 async def query_endpoint(request: QueryRequest):
-    """
-    Query the RAG system to get an answer based on the documentation.
-
-    Args:
-        request: QueryRequest containing the user query and optional parameters
-
-    Returns:
-        QueryResponse containing the answer and relevant documents
-    """
     try:
-        logger.info(f"Processing query: {request.query}")
-
-        # Create a new session for this query
+        logger.info(f"QUERY: {request.query}")
         session_id = await db_manager.create_session()
-        if session_id is None:
-            logger.warning("Could not create session - database not initialized")
 
-        # Check if selected text is provided (Selected Text Mode)
+        # =========================
+        # SELECTED TEXT MODE (NO QDRANT)
+        # =========================
         if request.selected_text and request.selected_text.strip():
-            logger.info("SELECTED TEXT MODE: Activated - bypassing Qdrant completely, using only user-provided text")
-
-            # In selected text mode, we don't query Qdrant at all (STRICT REQUIREMENT)
-            # We only use the selected text as context
             context = request.selected_text.strip()
             answer = generate_answer(request.query, context)
 
-            # Create a RelevantDoc from the selected text
             relevant_docs = [RelevantDoc(
-                text=request.selected_text,
+                text=context,
                 source="user_selected_text",
-                score=1.0  # Perfect score for user-provided text
+                score=1.0
             )]
 
-            # Log the selected text in the database
             if session_id:
-                await db_manager.save_selected_text(session_id, request.selected_text)
-                # Save the message with is_selection_based=True and source_type='selected_text'
                 await db_manager.save_message(
                     session_id,
                     request.query,
                     answer,
                     is_selection_based=True,
-                    source_type='selected_text'
+                    source_type="selected_text"
                 )
 
-            logger.info("ANSWER GENERATED: Source = user-selected text")
+            return QueryResponse(answer=answer, relevant_docs=relevant_docs)
 
-            return QueryResponse(
-                answer=answer,
-                relevant_docs=relevant_docs
-            )
+        # =========================
+        # QDRANT MODE
+        # =========================
+        query_embedding = generate_query_embedding(request.query)
+
+        search_results = qdrant_client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=query_embedding,
+            limit=request.top_k,
+            with_payload=True
+        )
+
+        # Extract points in the most defensive way possible
+        try:
+            # Try the standard approach first
+            if hasattr(search_results, 'points'):
+                points = search_results.points
+            else:
+                # If no points attribute, assume the result itself is the points
+                points = search_results
+        except:
+            # If there's an error accessing points, return an empty response
+            logger.error("Error accessing search results points")
+            answer = "Error retrieving information from the database."
+            return QueryResponse(answer=answer, relevant_docs=[])
+
+        relevant_docs = []
+        context_parts = []
+
+        # Process results with maximum defensive coding
+        if isinstance(points, (list, tuple)):
+            for result in points:
+                try:
+                    # Handle different possible structures of result
+                    # Check if result is a tuple (which would cause the original error)
+                    if isinstance(result, tuple):
+                        logger.warning(f"Received tuple result: {type(result)}, skipping")
+                        continue
+
+                    # Check if result has the expected attributes
+                    if not (hasattr(result, 'payload') and hasattr(result, 'score')):
+                        logger.warning(f"Result missing expected attributes: {type(result)}, skipping")
+                        continue
+
+                    # Access payload and score with try-catch
+                    try:
+                        payload = getattr(result, 'payload', None)
+                        score = getattr(result, 'score', 0)
+
+                        if not payload:
+                            continue
+
+                        text = payload.get("text", "") if isinstance(payload, dict) else str(payload)
+                        source = payload.get("source", "") if isinstance(payload, dict) else ""
+
+                    except AttributeError:
+                        logger.warning(f"Error accessing payload/score attributes, skipping result")
+                        continue
+
+                    if not text.strip():
+                        continue
+
+                    doc = RelevantDoc(
+                        text=text,
+                        source=source,
+                        score=score,
+                    )
+
+                    relevant_docs.append(doc)
+
+                    if len(" ".join(context_parts)) + len(text) <= request.max_context_length:
+                        context_parts.append(text)
+
+                except Exception as e:
+                    logger.error(f"Error processing individual result: {e}")
+                    continue  # Skip this result and continue with others
         else:
-            logger.info("QDRANT MODE: Activated - performing vector search in Qdrant for relevant documents")
+            # Handle case where points is not a list/tuple
+            logger.error("Unexpected search results format")
+            raise Exception("Unexpected search results format from Qdrant")
 
-            # Generate embedding for the query
-            query_embedding = generate_query_embedding(request.query)
+        if not relevant_docs:
+            answer = "I could not find relevant information in the documentation."
+            return QueryResponse(answer=answer, relevant_docs=[])
 
-            # Search in Qdrant for relevant chunks
-            search_results = qdrant_client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_embedding,
-                limit=request.top_k,
-                with_payload=True
+        context = "\n\n".join(context_parts)
+        answer = generate_answer(request.query, context)
+
+        if session_id:
+            message_id = await db_manager.save_message(
+                session_id,
+                request.query,
+                answer,
+                is_selection_based=False,
+                source_type="qdrant",
             )
 
-            # Extract relevant documents
-            relevant_docs = []
-            context_parts = []
-
-            # Handle different result formats depending on Qdrant client version
-            for result in search_results:
-                # Check if result has payload attribute (newer versions)
-                if hasattr(result, 'payload') and result.payload:
-                    doc = RelevantDoc(
-                        text=result.payload.get("text", ""),
-                        source=result.payload.get("source", ""),
-                        score=getattr(result, 'score', 0.0)  # Use getattr to handle different result formats
-                    )
-                # For older versions or different result formats
-                elif isinstance(result, dict) and 'payload' in result:
-                    doc = RelevantDoc(
-                        text=result['payload'].get("text", ""),
-                        source=result['payload'].get("source", ""),
-                        score=result.get('score', 0.0)
-                    )
-                else:
-                    continue  # Skip if we can't extract the payload properly
-
-                relevant_docs.append(doc)
-
-                # Add to context for LLM, limiting the total context length
-                if len(" ".join(context_parts)) + len(doc.text) <= request.max_context_length:
-                    context_parts.append(doc.text)
-
-            if not relevant_docs:
-                logger.warning("No relevant documents found for the query")
-                answer = "I couldn't find any relevant information in the documentation to answer your query."
-                relevant_docs = []
-
-                # Save the message with source_type='qdrant' even when no docs found
-                if session_id:
-                    await db_manager.save_message(
-                        session_id,
-                        request.query,
-                        answer,
-                        is_selection_based=False,
-                        source_type='qdrant'
-                    )
-
-                return QueryResponse(
-                    answer=answer,
-                    relevant_docs=relevant_docs
-                )
-
-            # Generate answer using the LLM with context
-            context = "\n\n".join(context_parts)
-            answer = generate_answer(request.query, context)
-
-            logger.info(f"ANSWER GENERATED: Source = Qdrant retrieved documents. Found {len(relevant_docs)} relevant documents")
-
-            # Save retrieval logs for each relevant document
-            if session_id:
-                message_id = await db_manager.save_message(
+            for doc in relevant_docs:
+                await db_manager.save_retrieval_log(
                     session_id,
-                    request.query,
-                    answer,
-                    is_selection_based=False,
-                    source_type='qdrant'
+                    message_id,
+                    None,
+                    doc.score,
+                    doc.source,
+                    doc.text,
                 )
 
-                for doc in relevant_docs:
-                    await db_manager.save_retrieval_log(
-                        session_id,
-                        message_id,
-                        None,  # chunk_id could be added if available in payload
-                        doc.score,
-                        doc.source,
-                        doc.text
-                    )
-
-            return QueryResponse(
-                answer=answer,
-                relevant_docs=relevant_docs
-            )
+        return QueryResponse(answer=answer, relevant_docs=relevant_docs)
 
     except Exception as e:
-        logger.error(f"Error processing query: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
+        logger.exception("QUERY FAILED")
+        raise HTTPException(status_code=500, detail=str(e))
 
-
+# =========================
+# EMBEDDING
+# =========================
 def generate_query_embedding(query: str) -> List[float]:
     """
-    Generate embedding for the input query using Gemini API.
-
-    Args:
-        query: The input query string
-
-    Returns:
-        List of floats representing the embedding vector
+    Generate embedding for the input query using Gemini API
     """
     try:
-        import google.generativeai as genai
         result = genai.embed_content(
-            model="models/embedding-001",
-            content=query
+            model="models/text-embedding-004",  # Updated to use the same model as document embeddings
+            content=query,
         )
-        return result['embedding']
+        logger.info(f"Generated query embedding with length: {len(result['embedding'])}")
+        return result["embedding"]
     except Exception as e:
-        logger.error(f"Error generating query embedding: {str(e)}")
+        logger.error(f"Error generating query embedding: {e}")
         # Provide a fallback with mock embeddings if API fails (for testing purposes)
-        # In production, you might want to handle this differently
         import numpy as np
         # Generate random embeddings with the correct dimensions (768 for our Qdrant setup)
-        return np.random.random(768).astype(np.float32).tolist()
+        fallback_embedding = np.random.random(768).astype(np.float32).tolist()
+        logger.warning(f"Using fallback embedding of length: {len(fallback_embedding)}")
+        return fallback_embedding
 
-
+# =========================
+# ANSWER GENERATION
+# =========================
 def generate_answer(query: str, context: str) -> str:
-    """
-    Generate an answer using the LLM based on the query and context.
+    prompt = f"""
+You are a helpful assistant.
+Use ONLY the context below to answer.
 
-    Args:
-        query: The user's query
-        context: Retrieved context from the documentation or user-selected text
+Context:
+{context}
 
-    Returns:
-        Generated answer string
-    """
+Question: {query}
+Answer:
+"""
+
     try:
-        # Create a prompt with the query and context
-        prompt = f"""
-        You are a helpful assistant that answers questions based on provided documentation.
-        Use only the information in the context below to answer the question.
-        If the context doesn't contain enough information to answer the question, say so.
-
-        Context:
-        {context}
-
-        Question: {query}
-
-        Answer:
-        """
-
-        # Generate response using the Gemini model
-        response = model.generate_content(
+        response = llm_model.generate_content(
             prompt,
-            generation_config={
-                "temperature": 0.7,
-                "max_output_tokens": 1024,
-            }
+            generation_config={"temperature": 0.7, "max_output_tokens": 1024},
         )
-
-        # Return the generated text
-        return response.text if response.text else "I couldn't generate an answer based on the provided context."
-
+        return response.text or "No answer generated."
     except Exception as e:
-        logger.error(f"Error generating answer: {str(e)}")
-        # Fallback response if API call fails
-        return f"Due to an API error, I couldn't generate a full response. Error: {str(e)[:100]}..."
+        logger.error(f"LLM error: {e}")
+        return "LLM failed to generate answer."
+
+# Import embedding and storage functions from separate modules
+# All utility functions are now in embed.py and store.py
 
 
-@app.get("/test-connection")
-async def test_connection():
-    """
-    Test endpoint to verify connection to Qdrant collection and get collection details.
-
-    Returns:
-        JSON with collection status, number of vectors, and vector dimensions.
-    """
+# =========================
+# EMBEDDING ENDPOINTS
+# =========================
+@app.post("/embed-documents")
+async def embed_documents_endpoint():
+    """Endpoint to trigger the embedding process for all documents in the docs folder"""
     try:
-        # Test connection to Qdrant and get collection info
-        collection_info = qdrant_client.get_collection(COLLECTION_NAME)
-
-        # Extract collection details
-        collection_status = "available"
-        vector_count = collection_info.points_count
-        vector_dimensions = None
-
-        # Get vector configuration to determine dimensions
-        if hasattr(collection_info, 'config') and collection_info.config:
-            # For newer Qdrant client versions
-            if hasattr(collection_info.config, 'params') and collection_info.config.params:
-                vector_config = collection_info.config.params.vectors
-                if hasattr(vector_config, 'size'):
-                    vector_dimensions = vector_config.size
-                elif isinstance(vector_config, dict) and 'size' in vector_config:
-                    vector_dimensions = vector_config['size']
-                elif hasattr(vector_config, '__dict__') and 'size' in vector_config.__dict__:
-                    # Handle different vector config structures
-                    vector_dimensions = getattr(vector_config, 'size', None)
-
-        # Fallback: try to get vector dimensions from the first point if collection config is not available
-        if vector_dimensions is None:
-            try:
-                # Get one point to determine vector dimensions
-                sample_points = qdrant_client.retrieve(
-                    collection_name=COLLECTION_NAME,
-                    ids=[0] if vector_count > 0 else []
-                ) if vector_count > 0 else []
-
-                if sample_points:
-                    first_point = sample_points[0]
-                    if hasattr(first_point, 'vector') and first_point.vector:
-                        vector_dimensions = len(first_point.vector)
-                    elif isinstance(first_point, dict) and 'vector' in first_point and first_point['vector']:
-                        vector_dimensions = len(first_point['vector'])
-            except:
-                # If we can't determine vector dimensions, set to unknown
-                vector_dimensions = "unknown"
-
-        return {
-            "collection_status": collection_status,
-            "collection_name": COLLECTION_NAME,
-            "vector_count": vector_count,
-            "vector_dimensions": vector_dimensions,
-            "qdrant_url": QDRANT_URL,
-            "connection_status": "success"
-        }
+        # Use the embed_documents function from embed.py
+        embeddings_data = await asyncio.get_event_loop().run_in_executor(None, embed_documents)
+        # Store the embeddings using store.py function
+        await store_embeddings(embeddings_data)
+        return {"status": "success", "message": f"Documents embedded and stored successfully ({len(embeddings_data)} embeddings)"}
     except Exception as e:
-        logger.error(f"Connection test failed: {str(e)}")
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "error": "Connection to Qdrant failed",
-                "message": str(e),
-                "collection_name": COLLECTION_NAME,
-                "connection_status": "failed"
-            }
-        )
+        logger.error(f"Error during document embedding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
+# =========================
+# HEALTH
+# =========================
 @app.get("/health")
-async def health_check():
-    """Health check endpoint to verify the service is running and can connect to dependencies"""
-    try:
-        # Test connection to Qdrant
-        qdrant_client.get_collection(COLLECTION_NAME)
-        return {"status": "healthy", "qdrant": "connected"}
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        raise HTTPException(status_code=503, detail="Service not ready")
+async def health():
+    qdrant_client.get_collection(COLLECTION_NAME)
+    return {"status": "healthy"}
 
-
+# =========================
+# STARTUP / SHUTDOWN
+# =========================
 @app.on_event("startup")
-async def startup_event():
-    """Initialize database connection when the app starts."""
+async def startup():
     await db_manager.init_db()
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
-    """Close database connection when the app shuts down."""
+async def shutdown():
     await db_manager.close()
 
 

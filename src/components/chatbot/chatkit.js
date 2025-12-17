@@ -21,8 +21,11 @@ const Chatbot = () => {
         setIsLoading(true);
 
         try {
+            // Use environment variable for API endpoint, fallback to localhost
+            const apiEndpoint = process.env.REACT_APP_RAG_API_URL || 'http://127.0.0.1:8000/query';
+
             // Call the RAG API with the query only
-            const response = await fetch('http://127.0.0.1:8000/query', {
+            const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -44,9 +47,19 @@ const Chatbot = () => {
             setMessages((prevMessages) => [...prevMessages, botMessage]);
         } catch (error) {
             console.error('Error sending message:', error);
+
+            // Provide a more user-friendly error message based on the type of error
+            let errorMessageText = 'Sorry, an error occurred.';
+
+            if (error.message.includes('Failed to fetch')) {
+                errorMessageText = 'Sorry, an error occurred: Could not connect to the chatbot service. Please make sure the backend server is running on http://127.0.0.1:8000.';
+            } else {
+                errorMessageText = `Sorry, an error occurred: ${error.message || 'Something went wrong.'}`;
+            }
+
             const errorMessage = {
                 sender: 'bot',
-                text: `Sorry, an error occurred: ${error.message || 'Something went wrong.'}`
+                text: errorMessageText
             };
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
         } finally {
